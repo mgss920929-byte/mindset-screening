@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MindCheck | Clinical Screening</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+<div id="app" class="w-full max-w-2xl bg-white rounded-[2.5rem] shadow-xl overflow-hidden">
+
+  <section id="step-lang" class="p-10 text-center">
+    <h1 class="text-3xl font-black text-slate-900 mb-8 tracking-tight">Choose Language / भाषा चुनें</h1>
+    <div class="grid grid-cols-1 gap-4">
+      <button onclick="setLanguage('en')" class="p-4 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-2xl font-bold transition-all">English</button>
+      <button onclick="setLanguage('hi')" class="p-4 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-2xl font-bold transition-all">हिन्दी (Hindi)</button>
+      <button onclick="setLanguage('ru')" class="p-4 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-2xl font-bold transition-all">Русский (Russian)</button>
+      <button onclick="setLanguage('uz')" class="p-4 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-2xl font-bold transition-all">O'zbek (Uzbek)</button>
+      <button onclick="setLanguage('id')" class="p-4 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-2xl font-bold transition-all">Bahasa Indonesia</button>
+    </div>
+  </section>
+
+  <section id="step-home" class="hidden p-10">
+    <div class="text-center mb-10">
+      <h1 id="ui-title" class="text-5xl font-black text-slate-900 mb-4 tracking-tight">MindCheck.</h1>
+      <p id="ui-subtitle" class="text-slate-500 font-medium"></p>
+    </div>
+
+    <div class="grid gap-6 mb-10 text-left">
+      <div class="p-6 bg-blue-50 rounded-3xl border border-blue-100">
+        <h3 class="font-bold text-blue-900 mb-2 flex items-center">
+          <span class="mr-2">🧠</span> <span id="ui-symptoms-title"></span>
+        </h3>
+        <ul class="text-sm text-blue-800 space-y-2 opacity-80" id="ui-symptoms-list"></ul>
+      </div>
+
+      <div class="p-6 bg-red-50 rounded-3xl border border-red-100">
+        <h3 class="font-bold text-red-900 mb-2 flex items-center">
+          <span class="mr-2">⚠️</span> <span id="ui-pain-title"></span>
+        </h3>
+        <p id="ui-pain-desc" class="text-xs text-red-800 leading-relaxed"></p>
+      </div>
+    </div>
+
+    <button onclick="goToWelcome()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold hover:bg-slate-800 transition-all flex justify-between px-8 items-center">
+      <span id="ui-start-btn"></span> <span>→</span>
+    </button>
+    
+    <div class="mt-6 text-center">
+      <p id="ui-tg-text" class="text-xs text-slate-400"></p>
+      <a href="https://t.me/systamaticc" target="_blank" class="text-xs font-bold text-blue-600 hover:underline italic">
+        Contact @systamaticc
+      </a>
+    </div>
+  </section>
+
+  <div id="progress-container" class="hidden px-8 pt-8">
+    <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-2">
+      <span id="ui-progress-label"></span>
+      <span id="progress-text">0%</span>
+    </div>
+    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+      <div id="progress-bar" class="h-full bg-blue-600 transition-all duration-500"></div>
+    </div>
+  </div>
+
+  <section id="step-welcome" class="hidden p-10 text-center">
+    <h1 id="ui-who-title" class="text-3xl font-extrabold mb-3 text-slate-900"></h1>
+    <input id="user-name" type="text" placeholder=""
+      class="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 outline-none mb-6 text-center transition-all font-bold">
+    <button id="ui-continue-btn" onclick="startAssessment()"
+      class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all"></button>
+  </section>
+
+  <section id="step-transition" class="hidden p-10 text-center">
+    <div id="trans-icon" class="text-6xl mb-4"></div>
+    <h2 id="trans-title" class="text-2xl font-bold mb-3 text-slate-900"></h2>
+    <p id="trans-desc" class="text-slate-500 mb-8 leading-relaxed"></p>
+    <button id="ui-begin-scale-btn" onclick="beginScale()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all"></button>
+  </section>
+
+  <section id="step-quiz" class="hidden p-8">
+    <p id="ui-time-ref" class="text-sm font-semibold text-blue-600 mb-2 uppercase tracking-wide"></p>
+    <h2 id="question-text" class="text-2xl font-bold mb-8 min-h-[80px] text-slate-800 leading-snug"></h2>
+    <div id="options-container" class="grid gap-3"></div>
+  </section>
+
+  <section id="step-results" class="hidden p-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 id="ui-report-title" class="text-2xl font-bold text-slate-900"></h2>
+        <button id="ui-dl-btn" onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all"></button>
+    </div>
+    <div class="bg-slate-50 p-5 rounded-3xl mb-8 border border-slate-100">
+      <div class="h-[220px]"><canvas id="comparisonChart"></canvas></div>
+    </div>
+    <div id="detailed-analysis" class="space-y-4"></div>
+    <div class="mt-8 p-6 bg-slate-900 text-white rounded-3xl">
+        <p id="ui-footer-tg" class="text-sm font-medium mb-3"></p>
+        <a href="https://t.me/systamaticc" target="_blank" class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg font-bold text-xs">Message @systamaticc</a>
+    </div>
+    <button id="ui-restart-btn" onclick="location.reload()" class="mt-8 w-full py-3 text-slate-400 hover:text-blue-600 font-bold transition-all text-xs uppercase tracking-widest"></button>
+  </section>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
